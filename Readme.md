@@ -15,4 +15,3 @@ To Run, type:
 ```sh
 docker compose up -d
 ```
-
