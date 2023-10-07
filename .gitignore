@@ -2,3 +2,4 @@
 server/Cargo.lock
 server/target/*
 server/target
+.vscode
