@@ -5,6 +5,7 @@ version: '3.1'
 services:
   server:
     image: server
+    build: ./server
     command: sh -c "/app/server"
     ports:
     - 127.0.0.1:8080:8080
