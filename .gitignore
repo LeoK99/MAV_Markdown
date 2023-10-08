@@ -3,3 +3,6 @@ server/Cargo.lock
 server/target/*
 server/target
 .vscode
+client/node_modules
+client/node_modules/*
+client/package-lock.json
