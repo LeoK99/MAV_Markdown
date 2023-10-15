@@ -3,6 +3,13 @@ version: '3.1'
 
 
 services:
+  client:
+    image: client
+    build: ./client
+    command: sh -c "npm start"
+    ports:
+    - 127.0.0.1:3000:3000
+    working_dir: /code
   server:
     image: server
     build: ./server
