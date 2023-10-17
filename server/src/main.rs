@@ -61,7 +61,7 @@ async fn create_username_index(client: &Client) {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| "localhost:27017".into());
+    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb://localhost:27017".into());
     let client = Client::with_uri_str(uri).await.expect("faild to connect");
     create_username_index(&client).await;
     HttpServer::new(move || {
