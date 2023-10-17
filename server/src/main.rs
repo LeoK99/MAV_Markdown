@@ -44,11 +44,29 @@ async fn usertest(client: web::Data<Client>) -> HttpResponse{
         Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
     }
 }
+async fn create_username_index(client: &Client) {
+    let options = IndexOptions::builder().unique(true).build();
+    let model = IndexModel::builder()
+        .keys(doc! { "username": 1 })
+        .options(options)
+        .build();
+    client
+        .database(DB_NAME)
+        .collection::<User>(COLL_NAME)
+        .create_index(model, None)
+        .await
+        .expect("creating an index should succeed");
+}
+
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| {
+    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| "monogdb://localhost:27017".into());
+    let client = Client::with_uri_str(uri).await.expect("faild to connect");
+    create_username_index(&client).await;
+    HttpServer::new(move || {
         App::new()
+            .app_data(web::Data::new(client.clone()))
             .service(hello)
             .service(echo)
             .service(usertest)
