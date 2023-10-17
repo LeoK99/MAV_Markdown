@@ -18,7 +18,8 @@ RUN cargo fetch
 COPY src src
 
 # compile app
-RUN cargo build --release
+#RUN cargo build --release
+RUN cargo build
 
 ###############
 ## run stage ##
@@ -27,7 +28,7 @@ FROM debian:latest
 WORKDIR /app
 
 # copy server binary from build stage
-COPY --from=builder /code/target/release/server server
+COPY --from=builder /code/target/debug/server server
 
 # set user to non-root unless root is required for your app
 USER 1001
