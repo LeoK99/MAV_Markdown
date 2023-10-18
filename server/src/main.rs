@@ -1,8 +1,11 @@
 mod models;
 
+use std::fmt::format;
+
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use models::User;
-use mongodb::{bson::doc, options::IndexOptions, Client, Collection, IndexModel};
+use mongodb::{bson::{doc, oid::ObjectId}, options::IndexOptions, Client, Collection, IndexModel};
+use std::str::FromStr;
 
 const DB_NAME: &str = "admin";
 const COLL_NAME: &str = "system.users";
@@ -29,12 +32,25 @@ async fn add_user(client: web::Data<Client>, form: web::Form<User>) -> HttpRespo
         Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
     }
 }
+#[get("/user/{id}")]
+async fn get_user(client: web::Data<Client>, id: web::Path<String>) -> HttpResponse {
+    let id: ObjectId = mongodb::bson::oid::ObjectId::from_str(id.into_inner().as_str()).unwrap();
+    let collection: Collection<User> = client.database(DB_NAME).collection(COLL_NAME);
+    match collection
+        .find_one(doc! {"_id" : id} , None)
+        .await{
+            Ok(Some(user)) => HttpResponse::Ok().json(user),
+            Ok(None) => {
+                HttpResponse::NotFound().body(format!("No User found with id: {id}"))
+            },
+            Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
+        }
+}
 #[get("/usertest")]
 async fn usertest(client: web::Data<Client>) -> HttpResponse{
     let collection = client.database(DB_NAME).collection(COLL_NAME);
     let user = User {
         name: "Horst".to_string(),
-        id: "0".to_string(),
         username:"keksMaus35".to_string(),
        email:"pustKuchen44@gmx.de".to_string(),   
     };
@@ -61,7 +77,7 @@ async fn create_username_index(client: &Client) {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb://localhost:27017".into());
+    let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb://root:example@mongo:27017".into());
     let client = Client::with_uri_str(uri).await.expect("faild to connect");
     create_username_index(&client).await;
     HttpServer::new(move || {
@@ -70,6 +86,7 @@ async fn main() -> std::io::Result<()> {
             .service(hello)
             .service(echo)
             .service(usertest)
+            .service(get_user)
             .route("/hey", web::get().to(manual_hello))
     })
     .bind(("0.0.0.0", 8080))?
