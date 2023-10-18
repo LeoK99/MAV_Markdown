@@ -4,7 +4,7 @@ use std::fmt::format;
 
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use models::User;
-use mongodb::{bson::{doc, oid::ObjectId}, options::IndexOptions, Client, Collection, IndexModel};
+use mongodb::{bson::{doc, oid::ObjectId}, options::IndexOptions, Client as mongoClient, Collection, IndexModel};
 use std::str::FromStr;
 
 const DB_NAME: &str = "admin";
@@ -24,7 +24,7 @@ async fn manual_hello() -> impl Responder {
 }
 
 #[post("/add_user")]
-async fn add_user(client: web::Data<Client>, form: web::Form<User>) -> HttpResponse {
+async fn add_user(client: web::Data<mongoClient>, form: web::Form<User>) -> HttpResponse {
     let collection = client.database(DB_NAME).collection(COLL_NAME);
     let result = collection.insert_one(form.into_inner(), None).await;
     match result {
@@ -33,7 +33,7 @@ async fn add_user(client: web::Data<Client>, form: web::Form<User>) -> HttpRespo
     }
 }
 #[get("/user/{id}")]
-async fn get_user(client: web::Data<Client>, id: web::Path<String>) -> HttpResponse {
+async fn get_user(client: web::Data<mongoClient>, id: web::Path<String>) -> HttpResponse {
     let id: ObjectId = mongodb::bson::oid::ObjectId::from_str(id.into_inner().as_str()).unwrap();
     let collection: Collection<User> = client.database(DB_NAME).collection(COLL_NAME);
     match collection
@@ -47,7 +47,7 @@ async fn get_user(client: web::Data<Client>, id: web::Path<String>) -> HttpRespo
         }
 }
 #[get("/usertest")]
-async fn usertest(client: web::Data<Client>) -> HttpResponse{
+async fn usertest(client: web::Data<mongoClient>) -> HttpResponse{
     let collection = client.database(DB_NAME).collection(COLL_NAME);
     let user = User {
         name: "Horst".to_string(),
@@ -60,7 +60,7 @@ async fn usertest(client: web::Data<Client>) -> HttpResponse{
         Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
     }
 }
-async fn create_username_index(client: &Client) {
+async fn create_username_index(client: &mongoClient) {
     let options = IndexOptions::builder().unique(true).build();
     let model = IndexModel::builder()
         .keys(doc! { "username": 1 })
@@ -78,7 +78,7 @@ async fn create_username_index(client: &Client) {
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     let uri = std::env::var("MONGODB_URI").unwrap_or_else(|_| "mongodb://root:example@mongo:27017".into());
-    let client = Client::with_uri_str(uri).await.expect("faild to connect");
+    let client = mongoClient::with_uri_str(uri).await.expect("faild to connect");
     create_username_index(&client).await;
     HttpServer::new(move || {
         App::new()
