@@ -10,8 +10,10 @@ export function setupCounter(element: HTMLButtonElement) {
 
 export function setupfullStackTest(element: HTMLButtonElement) {
   const setfullStackTest = async () => {
-    const resp = await fetch("127.0.0.1:8080/usertest", {method: 'GET'})
-    element.innerHTML = `${resp}`
+    const resp = await fetch("http://localhost:8080/usertest", {
+      method: 'GET',
+    });
+    element.innerHTML = `Resp: ${resp.body}`
   }
   element.addEventListener('click', () => setfullStackTest())
   setfullStackTest()
