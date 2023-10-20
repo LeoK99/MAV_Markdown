@@ -4,7 +4,7 @@ This a Project that I started, to learn and practice webApp development.
 It uses the "MAV" tech-stack so:
 - MongoDB as the database
 - Actix-Web as the middleware/backend
-- VanillaTS as the frontend (served by Node in this case)
+- VanillaTS as the frontend (and Vite)
 
 To Build, type:
 ```sh
