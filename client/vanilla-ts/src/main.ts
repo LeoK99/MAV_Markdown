@@ -3,6 +3,7 @@ import typescriptLogo from './typescript.svg'
 import viteLogo from '/vite.svg'
 import { setupCounter } from './buttons.ts'
 import { setupfullStackTest } from './buttons.ts'
+import { ink } from 'ink-mde'
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>
@@ -19,11 +20,14 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
     <div class="card">
       <button id="fullStackTest" type="button"></button>
     </div>
+    <div id="editor"></div>
     <p class="read-the-docs">
       Click on the Vite and TypeScript logos to learn more
     </p>
   </div>
 `
-
+ink(document.getElementById("editor")!,{
+  doc: "# Hello World!",
+})
 setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
 setupfullStackTest(document.querySelector<HTMLButtonElement>("#fullStackTest")!)
