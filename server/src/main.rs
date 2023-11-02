@@ -3,12 +3,13 @@ mod models;
 use std::fmt::format;
 
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
-use models::User;
+use models::{User, Tag};
 use mongodb::{bson::{doc, oid::ObjectId}, options::IndexOptions, Client as mongoClient, Collection, IndexModel};
 use std::str::FromStr;
 
 const DB_NAME: &str = "admin";
 const COLL_NAME: &str = "system.users";
+const TAG_COLL: &str = "tags";
 #[get("/")]
 async fn hello() -> impl Responder {
     HttpResponse::Ok().body("Hello world!")
@@ -69,6 +70,20 @@ async fn create_username_index(client: &mongoClient) {
     client
         .database(DB_NAME)
         .collection::<User>(COLL_NAME)
+        .create_index(model, None)
+        .await
+        .expect("creating an index should succeed");
+}
+//Tags will be searched through quite often, so we create an Index to Speed up the Proccess
+async fn create_tag_index(cleint: &mongoClient){
+    let options = IndexOptions::builder().unique(true).build();
+    let model = IndexModel::builder()
+        .keys(doc! {"tagname":1})
+        .options(options)
+        .build();
+    cleint
+        .database(DB_NAME)
+        .collection::<Tag>(TAG_COLL)
         .create_index(model, None)
         .await
         .expect("creating an index should succeed");
