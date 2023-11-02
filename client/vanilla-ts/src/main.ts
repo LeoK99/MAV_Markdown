@@ -1,19 +1,11 @@
 import './style.css'
-import typescriptLogo from './typescript.svg'
-import viteLogo from '/vite.svg'
 import { setupCounter } from './buttons.ts'
 import { setupfullStackTest } from './buttons.ts'
 import { ink } from 'ink-mde'
+import { setupNavBar} from './navbar.ts'
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="${viteLogo}" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://www.typescriptlang.org/" target="_blank">
-      <img src="${typescriptLogo}" class="logo vanilla" alt="TypeScript logo" />
-    </a>
-    <h1>Vite + TypeScript</h1>
     <div class="card">
       <button id="counter" type="button"></button>
     </div>
@@ -21,13 +13,11 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
       <button id="fullStackTest" type="button"></button>
     </div>
     <div id="editor"></div>
-    <p class="read-the-docs">
-      Click on the Vite and TypeScript logos to learn more
-    </p>
   </div>
 `
-ink(document.getElementById("editor")!,{
+ink(document.querySelector<HTMLDivElement>("#editor")!,{
   doc: "# Hello World!",
 })
+setupNavBar(document.querySelector<HTMLDivElement>("#navBar")!)
 setupCounter(document.querySelector<HTMLButtonElement>('#counter')!)
 setupfullStackTest(document.querySelector<HTMLButtonElement>("#fullStackTest")!)
