@@ -19,7 +19,7 @@ pub struct Tag{
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Deserialize, Serialize)]
-pub struct Document{
+pub struct MdDocument{
     pub name: String,
     pub tags: Vec<Tag>,
     pub create_date: DateTime<Utc>,

@@ -3,9 +3,10 @@ mod models;
 use std::fmt::format;
 
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
-use models::{User, Tag};
+use models::{User, Tag, MdDocument};
 use mongodb::{bson::{doc, oid::ObjectId}, options::IndexOptions, Client as mongoClient, Collection, IndexModel};
 use std::str::FromStr;
+
 
 const DB_NAME: &str = "admin";
 const COLL_NAME: &str = "system.users";
@@ -60,6 +61,21 @@ async fn usertest(client: web::Data<mongoClient>) -> HttpResponse{
         Ok(_) => HttpResponse::Ok().body("user added"),
         Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
     }
+}
+//A Simple get Document by Id Func
+//TODO: ideally we would have a single "/document" URL wich handles all fetches based on wildecars
+//i.e GET /document?id={id}
+#[get("/document/{id}")]
+async fn get_doc_by_id(client: web::Data<mongoClient>, id: web::Path<String>)-> HttpResponse {
+    let id: ObjectId = mongodb::bson::oid::ObjectId::from_str(id.as_str()).unwrap();
+    let collection: Collection<MdDocument> = client.database(DB_NAME).collection(COLL_NAME);
+    match collection
+        .find_one(doc! {"_id":id}, None)
+        .await{
+            Ok(Some(document)) => HttpResponse::Ok().json(document),
+            Ok(None) => HttpResponse::NotFound().body(format!("No Document Found with id: {id}")),
+            Err(err) => HttpResponse::InternalServerError().body(err.to_string()),
+        }
 }
 async fn create_username_index(client: &mongoClient) {
     let options = IndexOptions::builder().unique(true).build();
